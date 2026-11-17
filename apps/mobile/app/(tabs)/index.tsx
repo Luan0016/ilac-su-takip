@@ -2,11 +2,14 @@ import { dosesForDay, isLowStock } from '@ilac/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CupButtons } from '@/src/components/CupButtons';
 import { DoseCard } from '@/src/components/DoseCard';
 import { LowStockBanner } from '@/src/components/LowStockBanner';
-import { Body, Screen, Title } from '@/src/components/ui';
+import { Body, Card, Screen, Title } from '@/src/components/ui';
+import { WaterRing } from '@/src/components/WaterRing';
 import { clearDoseStatus, setDoseStatus, useDoseLogs } from '@/src/db/repo/doses';
 import { useMedications } from '@/src/db/repo/medications';
+import { addWater, useWaterToday } from '@/src/db/repo/water';
 
 /** Re-renders every minute so "late" labels and the day roll over without reopening the app. */
 function useNow(): Date {
@@ -24,6 +27,7 @@ export default function TodayScreen() {
   const { meds, schedules } = useMedications();
   const logs = useDoseLogs();
   const doses = dosesForDay(meds, schedules, logs, now);
+  const water = useWaterToday(now);
   const lowStock = meds.filter((m) => isLowStock(m, schedules.filter((s) => s.medicationId === m.id), logs, now));
 
   return (
@@ -41,6 +45,11 @@ export default function TodayScreen() {
           onUndo={() => clearDoseStatus(dose.medication.id, dose.scheduledAt)}
         />
       ))}
+      <Card>
+        <Body style={{ fontWeight: '600' }}>{t('today.water')}</Body>
+        <WaterRing size="sm" totalMl={water.totalMl} goalMl={water.settings.dailyGoalMl} />
+        <CupButtons sizes={water.settings.cupSizesMl} onAdd={addWater} />
+      </Card>
     </Screen>
   );
 }
