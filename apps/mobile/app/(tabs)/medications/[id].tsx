@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 
-import { useDoseLogs } from '@/src/db/repo/doses';
+import { logExtraDose, useDoseLogs } from '@/src/db/repo/doses';
 import { archiveMedication, restock, useMedications } from '@/src/db/repo/medications';
 import { Body, Button, Card, Field, Row, Screen, Title } from '@/src/components/ui';
 
@@ -61,6 +61,8 @@ export default function MedicationDetailScreen() {
         <Field label={t('meds.restockPrompt')} value={restockValue} onChangeText={setRestockValue} keyboardType="decimal-pad" />
         <Button title={t('meds.restock')} variant="secondary" onPress={submitRestock} />
       </Card>
+
+      <Button title={t('meds.extraDose')} variant="secondary" onPress={() => logExtraDose(med.id)} />
 
       <Row>
         <Button title={t('common.edit')} variant="secondary" onPress={() => router.push({ pathname: '/medications/edit', params: { id: med.id } })} />
