@@ -1,35 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { occurrencesBetween } from './occurrences';
-import type { Medication, Schedule } from './schemas';
-
-export const med = (over: Partial<Medication> = {}): Medication => ({
-  id: 'm1',
-  name: 'Parol',
-  form: 'tablet',
-  doseAmount: 1,
-  doseUnit: 'adet',
-  strength: null,
-  color: '#3366FF',
-  notes: null,
-  startDate: '2026-11-01',
-  endDate: null,
-  stockQuantity: 30,
-  refillThresholdDays: 7,
-  stockSetAt: '2026-11-01T00:00:00.000Z',
-  archivedAt: null,
-  ...over,
-});
-
-const sched = (over: Partial<Schedule>): Schedule => ({
-  id: 's1',
-  medicationId: 'm1',
-  type: 'daily',
-  times: ['08:00'],
-  weekdays: [],
-  intervalHours: null,
-  anchorTime: null,
-  ...over,
-});
+import { med, sched } from './test-utils';
 
 // local-time day range [00:00, next 00:00)
 const day = (y: number, m: number, d: number): [Date, Date] => [new Date(y, m - 1, d), new Date(y, m - 1, d + 1)];
