@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+coverage/
+.expo/
+*.log
+.env
+.env.*
+!.env.example
+.superpowers/
+# AI araç ayarları (projeye ait değil)
+.claude/
+.swarm/
+.claude-flow/
+# Expo/native
+apps/mobile/android/
+apps/mobile/ios/
+*.tsbuildinfo
