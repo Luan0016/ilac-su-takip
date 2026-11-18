@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import migrations from '@/drizzle/migrations';
 import { db, ensureWaterSettings } from '@/src/db/client';
+import { useSession } from '@/src/store/session';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -24,7 +25,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!success) return;
-    ensureWaterSettings()
+    Promise.all([ensureWaterSettings(), useSession.getState().hydrate()])
       .then(() => setReady(true))
       .finally(() => SplashScreen.hideAsync());
   }, [success]);

@@ -1,4 +1,5 @@
 import { dosesForDay, isLowStock } from '@ilac/shared';
+import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,6 +30,8 @@ export default function TodayScreen() {
   const doses = dosesForDay(meds, schedules, logs, now);
   const water = useWaterToday(now);
   const lowStock = meds.filter((m) => isLowStock(m, schedules.filter((s) => s.medicationId === m.id), logs, now));
+
+  if (!water.settings.onboarded) return <Redirect href="/onboarding" />;
 
   return (
     <Screen>

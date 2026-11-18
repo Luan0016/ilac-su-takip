@@ -38,3 +38,7 @@ export async function deleteWater(id: string): Promise<void> {
 export async function saveWaterSettings(s: WaterSettings): Promise<void> {
   db.update(waterSettings).set(s).where(eq(waterSettings.id, WATER_SETTINGS_ID)).run();
 }
+
+export async function completeOnboarding(dailyGoalMl: number): Promise<void> {
+  db.update(waterSettings).set({ dailyGoalMl, onboarded: true }).where(eq(waterSettings.id, WATER_SETTINGS_ID)).run();
+}

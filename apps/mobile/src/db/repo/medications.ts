@@ -41,3 +41,9 @@ export async function restock(id: string, quantity: number): Promise<void> {
 export async function archiveMedication(id: string): Promise<void> {
   db.update(medications).set({ archivedAt: new Date().toISOString() }).where(eq(medications.id, id)).run();
 }
+
+/** id → name for every medication, archived ones included (history needs them). */
+export function useMedicationNames(): Map<string, string> {
+  const { data } = useLiveQuery(db.select({ id: medications.id, name: medications.name }).from(medications));
+  return new Map((data ?? []).map((m) => [m.id, m.name]));
+}
