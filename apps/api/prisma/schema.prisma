@@ -1,0 +1,134 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid(7)) @db.Uuid
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  locale        String         @default("tr")
+  consentAt     DateTime       @map("consent_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  refreshTokens RefreshToken[]
+  medications   Medication[]
+  schedules     Schedule[]
+  doseLogs      DoseLog[]
+  waterLogs     WaterLog[]
+  waterSettings WaterSettings?
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash    String    @unique @map("token_hash")
+  expiresAt    DateTime  @map("expires_at")
+  revokedAt    DateTime? @map("revoked_at")
+  replacedById String?   @map("replaced_by_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Medication {
+  id                  String     @id @db.Uuid
+  userId              String     @map("user_id") @db.Uuid
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  form                String
+  doseAmount          Decimal    @map("dose_amount") @db.Decimal(10, 3)
+  doseUnit            String     @map("dose_unit")
+  strength            String?
+  color               String
+  notes               String?
+  startDate           String     @map("start_date") // YYYY-MM-DD wall-clock day
+  endDate             String?    @map("end_date")
+  stockQuantity       Decimal    @map("stock_quantity") @db.Decimal(10, 3)
+  stockSetAt          DateTime   @map("stock_set_at")
+  refillThresholdDays Int        @default(7) @map("refill_threshold_days")
+  archivedAt          DateTime?  @map("archived_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+  deletedAt           DateTime?  @map("deleted_at")
+  schedules           Schedule[]
+  doseLogs            DoseLog[]
+
+  @@index([userId, updatedAt])
+  @@map("medications")
+}
+
+model Schedule {
+  id            String     @id @db.Uuid
+  userId        String     @map("user_id") @db.Uuid
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicationId  String     @map("medication_id") @db.Uuid
+  medication    Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  type          String // daily | weekdays | interval
+  times         String[]
+  weekdays      Int[]
+  intervalHours Int?       @map("interval_hours")
+  anchorTime    String?    @map("anchor_time")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  deletedAt     DateTime?  @map("deleted_at")
+
+  @@index([userId, updatedAt])
+  @@map("schedules")
+}
+
+model DoseLog {
+  id           String     @id @db.Uuid
+  userId       String     @map("user_id") @db.Uuid
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicationId String     @map("medication_id") @db.Uuid
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  scheduledAt  DateTime   @map("scheduled_at")
+  status       String // taken | skipped | snoozed | missed
+  takenAt      DateTime?  @map("taken_at")
+  snoozedUntil DateTime?  @map("snoozed_until")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  @@unique([medicationId, scheduledAt])
+  @@index([userId, updatedAt])
+  @@map("dose_logs")
+}
+
+model WaterLog {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountMl  Int       @map("amount_ml")
+  loggedAt  DateTime  @map("logged_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([userId, updatedAt])
+  @@map("water_logs")
+}
+
+model WaterSettings {
+  userId          String   @id @map("user_id") @db.Uuid
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyGoalMl     Int      @map("daily_goal_ml")
+  wakeTime        String   @map("wake_time")
+  sleepTime       String   @map("sleep_time")
+  intervalMinutes Int      @map("interval_minutes")
+  cupSizesMl      Int[]    @map("cup_sizes_ml")
+  enabled         Boolean  @default(true)
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("water_settings")
+}
