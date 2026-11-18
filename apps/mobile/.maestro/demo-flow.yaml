@@ -1,0 +1,39 @@
+# Ön kontrol demo akışı. Temiz kurulumlu bir development build üzerinde çalışır:
+#   npx expo run:android   (telefon USB ile bağlı, uygulama verisi silinmiş)
+#   maestro test apps/mobile/.maestro/demo-flow.yaml
+appId: com.ilacsutakip.app
+---
+- launchApp:
+    clearState: true
+# Onboarding
+- tapOn: "İleri"
+- tapOn: "Başla"
+# İlaç ekle
+- tapOn: "İlaçlar"
+- tapOn: "İlaç ekle"
+- tapOn: "İlaç adı"
+- inputText: "Parol"
+- tapOn: "İleri"
+- tapOn: "Saatler (virgülle, ör. 08:00, 20:00)"
+- eraseText
+- inputText: "08:00, 20:00"
+- tapOn: "İleri"
+- tapOn: "Elindeki miktar"
+- inputText: "20"
+- tapOn: "Kaydet"
+# Bugün: iki doz kartı, ilkini al
+- tapOn: "Bugün"
+- assertVisible: "08:00"
+- assertVisible: "20:00"
+- tapOn:
+    text: "Aldım"
+    index: 0
+- assertVisible: ".*alındı"
+# Stok 19'a düştü
+- tapOn: "İlaçlar"
+- tapOn: "Parol"
+- assertVisible: "19 adet.*"
+# Su
+- tapOn: "Su"
+- tapOn: "300 ml"
+- assertVisible: "%15"

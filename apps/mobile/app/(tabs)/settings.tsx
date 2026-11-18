@@ -1,14 +1,17 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { api } from '@/src/api/client';
 import { Body, Button, Card, Row, Screen, Title } from '@/src/components/ui';
+import { seedDemo } from '@/src/db/seed-demo';
 import { useSession } from '@/src/store/session';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const session = useSession((s) => s.session);
+  const [demoLoaded, setDemoLoaded] = useState(false);
 
   return (
     <Screen>
@@ -31,6 +34,15 @@ export default function SettingsScreen() {
         <Button title={t('settings.water')} variant="secondary" onPress={() => router.navigate('/water')} />
         <Body>{`${t('settings.language')}: ${t('settings.languageTr')}`}</Body>
       </Card>
+
+      {__DEV__ && (
+        <Button
+          title={demoLoaded ? t('settings.demoLoaded') : t('settings.loadDemo')}
+          variant="secondary"
+          disabled={demoLoaded}
+          onPress={() => void seedDemo().then(() => setDemoLoaded(true))}
+        />
+      )}
 
       <Body muted>{t('settings.disclaimer')}</Body>
       <Body muted>{t('settings.version', { version: Constants.expoConfig?.version ?? '?' })}</Body>
