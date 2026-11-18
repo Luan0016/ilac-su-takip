@@ -37,3 +37,21 @@ export function isLowStock(med: Medication, schedules: Schedule[], logs: DoseLog
   }
   return true;
 }
+
+/** User-typed amount ("1,5" allowed) → number ≥ 0, or null when empty or invalid (never silently 0). */
+export function parseQuantity(input: string): number | null {
+  const s = input.trim().replace(',', '.');
+  if (s === '') return null;
+  const n = Number(s);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+/**
+ * The edit form shows the current (derived) stock. Saving the same amount keeps the base and
+ * its timestamp; a different amount becomes the new base counted from now.
+ */
+export function stockAfterEdit(med: Medication, logs: DoseLog[], enteredQuantity: number, nowIso: string): { stockQuantity: number; stockSetAt: string } {
+  return enteredQuantity === currentStock(med, logs)
+    ? { stockQuantity: med.stockQuantity, stockSetAt: med.stockSetAt }
+    : { stockQuantity: enteredQuantity, stockSetAt: nowIso };
+}

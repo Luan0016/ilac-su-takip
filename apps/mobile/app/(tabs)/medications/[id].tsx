@@ -1,4 +1,4 @@
-import { currentStock, daysLeft, type Schedule } from '@ilac/shared';
+import { currentStock, daysLeft, parseQuantity, type Schedule } from '@ilac/shared';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,8 +30,8 @@ export default function MedicationDetailScreen() {
   };
 
   const submitRestock = async () => {
-    const quantity = Number(restockValue.replace(',', '.'));
-    if (!Number.isFinite(quantity) || quantity < 0) return;
+    const quantity = parseQuantity(restockValue);
+    if (quantity === null) return;
     await restock(med.id, quantity);
     setRestockValue('');
   };

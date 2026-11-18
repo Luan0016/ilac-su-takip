@@ -1,10 +1,10 @@
-import type { Medication, MedicationInput, Schedule, ScheduleInput } from '@ilac/shared';
+import { stockAfterEdit, type Medication, type MedicationInput, type Schedule, type ScheduleInput } from '@ilac/shared';
 import { eq, isNull } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 
 import { newId } from '@/src/id';
 import { db } from '../client';
-import { medications, schedules } from '../schema';
+import { doseLogs, medications, schedules } from '../schema';
 
 export function useMedications(): { meds: Medication[]; schedules: Schedule[] } {
   const { data: meds } = useLiveQuery(db.select().from(medications).where(isNull(medications.archivedAt)).orderBy(medications.name));
@@ -19,9 +19,9 @@ export async function saveMedication(input: MedicationInput, scheduleInputs: Sch
   db.transaction((tx) => {
     const existing = id ? tx.select().from(medications).where(eq(medications.id, id)).get() : undefined;
     if (existing) {
-      const stockChanged = existing.stockQuantity !== input.stockQuantity;
+      const logs = tx.select().from(doseLogs).where(eq(doseLogs.medicationId, medId)).all();
       tx.update(medications)
-        .set({ ...input, stockSetAt: stockChanged ? now : existing.stockSetAt })
+        .set({ ...input, ...stockAfterEdit(existing, logs, input.stockQuantity, now) })
         .where(eq(medications.id, medId))
         .run();
       tx.delete(schedules).where(eq(schedules.medicationId, medId)).run();

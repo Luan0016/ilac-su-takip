@@ -38,7 +38,7 @@ const STEP_FIELDS: (keyof Values)[][] = [
   ['stockQuantity', 'refillThresholdDays'],
 ];
 
-const num = (s: string) => (s.trim() === '' ? NaN : Number(s.trim().replace(',', '.')));
+const num = (s: string) => (s.trim() === '' ? NaN : Number(s.trim().replace(',', '.'))); // NaN → schema reports the field
 const orNull = (s: string) => (s.trim() === '' ? null : s.trim());
 const padTime = (s: string) => (/^\d:\d\d$/.test(s) ? `0${s}` : s);
 const str = (n: number | null | undefined) => (n === null || n === undefined ? '' : String(n));

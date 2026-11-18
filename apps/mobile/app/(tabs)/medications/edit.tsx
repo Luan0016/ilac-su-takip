@@ -1,7 +1,9 @@
+import { currentStock } from '@ilac/shared';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { MedicationForm } from '@/src/components/MedicationForm';
+import { useDoseLogs } from '@/src/db/repo/doses';
 import { saveMedication, useMedications } from '@/src/db/repo/medications';
 import { Body, Screen } from '@/src/components/ui';
 
@@ -10,6 +12,7 @@ export default function EditMedicationScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { t } = useTranslation();
   const { meds, schedules } = useMedications();
+  const logs = useDoseLogs();
   const med = id ? meds.find((m) => m.id === id) : undefined;
 
   if (id && !med) return <Screen><Body muted>{t('common.loading')}</Body></Screen>;
@@ -25,7 +28,7 @@ export default function EditMedicationScreen() {
       notes: med.notes,
       startDate: med.startDate,
       endDate: med.endDate,
-      stockQuantity: med.stockQuantity,
+      stockQuantity: currentStock(med, logs),
       refillThresholdDays: med.refillThresholdDays,
     },
     schedules: schedules.filter((s) => s.medicationId === med.id),

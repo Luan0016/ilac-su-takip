@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { averageDailyDoses, currentStock, daysLeft, isLowStock } from './stock';
+import { averageDailyDoses, currentStock, daysLeft, isLowStock, parseQuantity, stockAfterEdit } from './stock';
 import { log, med, sched } from './test-utils';
 
 const T = '2026-11-20T10:00:00.000Z';
@@ -76,5 +76,33 @@ describe('isLowStock', () => {
   });
   it('false without schedules', () => {
     expect(isLowStock(med({ stockQuantity: 0 }), [], [], today)).toBe(false);
+  });
+});
+
+describe('parseQuantity (restock / stock inputs)', () => {
+  it('empty input is not a quantity (does not become 0)', () => {
+    expect(parseQuantity('')).toBeNull();
+    expect(parseQuantity('   ')).toBeNull();
+  });
+  it('accepts comma decimals and zero', () => {
+    expect(parseQuantity('1,5')).toBe(1.5);
+    expect(parseQuantity('0')).toBe(0);
+  });
+  it('rejects negatives and text', () => {
+    expect(parseQuantity('-1')).toBeNull();
+    expect(parseQuantity('abc')).toBeNull();
+  });
+});
+
+describe('stockAfterEdit (edit form shows current stock)', () => {
+  const NOW = '2026-11-25T10:00:00.000Z';
+  const m = med({ stockQuantity: 20, stockSetAt: T });
+  const logs = [1, 2, 3, 4, 5, 6].map((h) => log({ takenAt: at(h), scheduledAt: at(h) })); // current stock 14
+
+  it('unchanged current stock keeps base stock and stockSetAt', () => {
+    expect(stockAfterEdit(m, logs, 14, NOW)).toEqual({ stockQuantity: 20, stockSetAt: T });
+  });
+  it('a changed amount becomes the new base from now', () => {
+    expect(stockAfterEdit(m, logs, 30, NOW)).toEqual({ stockQuantity: 30, stockSetAt: NOW });
   });
 });
