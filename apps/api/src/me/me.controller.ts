@@ -13,6 +13,9 @@ export class MeController {
 
   @Get()
   me(@CurrentUser() user: AuthUser) {
-    return this.prisma.user.findUniqueOrThrow({ where: { id: user.id }, select: { id: true, email: true, locale: true } });
+    return this.prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+      select: { id: true, email: true, locale: true },
+    });
   }
 }

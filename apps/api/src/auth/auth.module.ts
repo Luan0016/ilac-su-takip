@@ -9,8 +9,15 @@ import { ACCESS_TOKEN_TTL } from './tokens.js';
 @Global()
 @Module({
   imports: [
-    JwtModule.registerAsync({ useFactory: () => ({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: ACCESS_TOKEN_TTL } }) }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: Number(process.env.AUTH_THROTTLE_LIMIT ?? 10) }]),
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: ACCESS_TOKEN_TTL },
+      }),
+    }),
+    ThrottlerModule.forRoot([
+      { ttl: 60_000, limit: Number(process.env.AUTH_THROTTLE_LIMIT ?? 10) },
+    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtGuard],
